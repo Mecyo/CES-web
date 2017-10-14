@@ -62,7 +62,7 @@ class Usuario(models.Model):
     name = models.CharField(max_length=250, blank=True, null=True)
     email = models.CharField(max_length=50, unique=True, blank=False,)
     senha = models.TextField(blank=False, null=False)
-    profileName = models.ForeignKey(PerfilUsuario)
+    perfilUsuario_id = models.ForeignKey(PerfilUsuario)
 
     def __str__(self):
         return self.name
@@ -76,7 +76,6 @@ class Movimentacao(models.Model):
     id= models.AutoField(primary_key=True, blank=False, null=False)
     retirada = models.DateTimeField(null=True, blank=True)
     devolucao = models.DateTimeField(null=True, blank=True)
-    reserva = models.DateTimeField(null=True, blank=True)
     objeto_id = models.ForeignKey(Objeto)
     usuario_id = models.ForeignKey(Usuario)
     status = models.IntegerField(choices=STATUS_MOVIMENTACAO, default=0, blank=True)
@@ -107,21 +106,6 @@ class Permissao_Objeto_x_PerfilUsuario(models.Model):
         return str(self.id)
 
 
-class Transferencia(models.Model):
-    id= models.AutoField(primary_key=True, blank=False, null=False)
-    movimentacao_id_origem = models.ForeignKey(Movimentacao, related_name='movimentacao_id_origem')
-    movimentacao_id_destino = models.ForeignKey(Movimentacao, related_name='movimentacao_id_destino')
-
-    def __str__(self):
-        return str("Transferindo {0} de {1} para {2}").format(self.movimentacao_id_origem.objeto_id,
-                                                              self.movimentacao_id_origem.usuario_id,
-                                                              self.movimentacao_id_destino.usuario_id)
-
-    class Meta:
-        verbose_name = "Transferência"
-        verbose_name_plural = "Transferências"
-
-
 class Reserva(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)
     dataReserva = models.DateTimeField(null=True, blank=True)
@@ -135,6 +119,18 @@ class Reserva(models.Model):
         verbose_name = "Reserva"
         verbose_name_plural = "Reservas"
 
+
+class Transferencia(models.Model):
+    id= models.AutoField(primary_key=True, blank=False, null=False)
+    remetente = models.ForeignKey(Movimentacao, related_name='remetente')
+    destinatario = models.ForeignKey(Movimentacao, related_name='destinatario')
+
+    def __str__(self):
+        return str("Transferindo {0} de {1} para {2}").format(self.remetente.objeto_id, self.remetente.usuario_id, self.destinatario.usuario_id)
+
+    class Meta:
+        verbose_name = "Transferência"
+        verbose_name_plural = "Transferências"
 
 
 class AdminWeb(models.Model):

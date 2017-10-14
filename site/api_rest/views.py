@@ -53,6 +53,7 @@ class ObjetoDisponivelServiceView(APIView):
 
     def get(self, request, format=None):
         objetos =  models.Objeto.objects.filter(status=1)
+        reservas = models.Objeto.objects.filter(data)
         movimentacoes = models.Movimentacao.objects.filter(devolucao=None)
         movimentacoes_objetos = []
         objetos_list = []
@@ -138,7 +139,7 @@ class EmprestarObjetoServiceView(APIView):
                                                    status = 1)
                 objeto.status = 3
                 objeto.save()
-                return Response(200)
+
         return Response(204)
 
 
@@ -186,7 +187,6 @@ class TransferirObjetoServiceView(APIView):
                                                status = 6)
             tranferencia = models.Transferencia.objects.create(movimentacao_id_origem = movimentacao_origem,
                                                                movimentacao_id_destino = movimentacao_destino)
-            return Response(200)
         return Response(204)
 
 
@@ -280,8 +280,12 @@ class SolicitarReservaServiceView(APIView):
                                                    objeto_id = objeto,
                                                    usuario_id = usuario,
                                                    status = 8)
-                return Response(200)
         return Response(204)
+
+
+#class ConfirmarTransferenciaObjetoServiceView(APIView):
+    # permission_classes = (permissions.IsAuthenticated,)
+ #   def post(self, request, format=None):
 
 
 class FiltroMovimentacaoUsuarioServiceView(APIView):
