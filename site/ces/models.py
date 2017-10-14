@@ -122,6 +122,21 @@ class Transferencia(models.Model):
         verbose_name_plural = "Transferências"
 
 
+class Reserva(models.Model):
+    id = models.AutoField(primary_key=True, blank=False, null=False)
+    dataReserva = models.DateTimeField(null=True, blank=True)
+    objeto_id = models.ForeignKey(Objeto)
+    usuario_id = models.ForeignKey(Usuario)
+
+    def __str__(self):
+        return str("{0} reservou {1} para o dia {2}").format(self.usuario_id, self.objeto_id, self.dataReserva)
+
+    class Meta:
+        verbose_name = "Reserva"
+        verbose_name_plural = "Reservas"
+
+
+
 class AdminWeb(models.Model):
     id= models.AutoField(primary_key=True, blank=False, null=False)
     tipoObjeto_id = models.ForeignKey(TipoObjeto)
