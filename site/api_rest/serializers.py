@@ -11,15 +11,18 @@ class ObjetoSerializer(serializers.ModelSerializer):
 
 
 class MovimentacaoSerializer(serializers.ModelSerializer):
+    usuario_id = UsuarioSerializer()
+    reserva = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
-    objeto_id = ObjetoSerializer()
     class Meta:
         model = models.Movimentacao
-        fields = ('id', 'retirada', 'devolucao', 'objeto_id', 'usuario_id', 'status')
+        fields = ('id', 'retirada', 'devolucao', 'reserva', 'objeto_id', 'usuario_id', 'status')
         depth = 1
 
 
 class TransferenciaSerializer(serializers.ModelSerializer):
+    movimentacao_id_origem = MovimentacaoSerializer()
+    movimentacao_id_destino = MovimentacaoSerializer()
 
     class Meta:
         model = models.Transferencia

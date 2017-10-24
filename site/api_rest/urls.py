@@ -22,4 +22,6 @@ urlpatterns = [
     url(r'^listar_transferencias_usuario/', views.ListarTransferenciasUsuarioServiceView.as_view(), name='listar_transferencias_usuario'),
     url(r'^exibir_transferencia/', views.ExibirTransferenciaServiceView.as_view(), name='exibir_transferencia'),
     url(r'^solicitar_reserva/', views.SolicitarReservaServiceView.as_view(), name='solicitar_reserva'),
+    url(r'^exibir_reservas_usuario/', views.ExibirReservasAbertasUsuarioServiceView.as_view(), name='exibir_reservas_usuario'),
+    url(r'^cancelar_reserva/', views.CancelarReservaServiceView.as_view(), name='cancelar_reserva'),
 ]

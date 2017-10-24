@@ -53,15 +53,20 @@ class ObjetoDisponivelServiceView(APIView):
 
     def get(self, request, format=None):
         objetos =  models.Objeto.objects.filter(status=1)
-        reservas = models.Objeto.objects.filter(data)
-        movimentacoes = models.Movimentacao.objects.filter(devolucao=None)
-        movimentacoes_objetos = []
         objetos_list = []
-        for mov in movimentacoes:
-            movimentacoes_objetos.append(mov.objeto_id)
+
         for obj in objetos:
-            if obj not in movimentacoes_objetos:
+            tem_reserva = False
+            movimentacoes = models.Movimentacao.objects.filter(objeto_id=obj, reserva__isnull=False).all()
+            now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            if movimentacoes:
+                for mov in movimentacoes:
+                    if mov.reserva <= now <= (mov.reserva + timedelta(minutes=tolerancia)):
+                        tem_reserva = True
+                        break
+            if tem_reserva == False:
                 objetos_list.append(obj)
+
         serializer = serializers.ObjetoSerializer(objetos_list, many=True)
         return Response(serializer.data)
 
@@ -139,7 +144,7 @@ class EmprestarObjetoServiceView(APIView):
                                                    status = 1)
                 objeto.status = 3
                 objeto.save()
-
+                return Response(200)
         return Response(204)
 
 
@@ -187,6 +192,7 @@ class TransferirObjetoServiceView(APIView):
                                                status = 6)
             tranferencia = models.Transferencia.objects.create(movimentacao_id_origem = movimentacao_origem,
                                                                movimentacao_id_destino = movimentacao_destino)
+            return Response(200)
         return Response(204)
 
 
@@ -264,13 +270,9 @@ class SolicitarReservaServiceView(APIView):
             movimentacoes = models.Movimentacao.objects.filter(objeto_id=objeto, status=8, reserva__isnull=False).all()
             if movimentacoes:
                 for mov in movimentacoes:
-                    print(mov.reserva)
-                    print(data_reserva_obj)
-                    print(mov.reserva + timedelta(minutes=tolerancia))
                     if mov.reserva <= data_reserva_obj <= (mov.reserva + timedelta(minutes=tolerancia)):
                         tem_reserva = True
                         break
-                print(tem_reserva)
             if tem_reserva == False:
                 usuario_id = request.data.get('usuario_id')
                 usuario = models.Usuario.objects.get(id = usuario_id)
@@ -280,14 +282,39 @@ class SolicitarReservaServiceView(APIView):
                                                    objeto_id = objeto,
                                                    usuario_id = usuario,
                                                    status = 8)
+                return Response(200)
+        return Response(204)
+
+
+class ExibirReservasAbertasUsuarioServiceView(APIView):
+
+    def post(self, request, format=None):
+        usuario_id = request.data.get('usuario_id')
+        usuario = models.Usuario.objects.get(id=usuario_id)
+        movimentacoes =  models.Movimentacao.objects.filter(usuario_id__id=usuario.id,
+                                                            reserva__isnull=False,
+                                                            retirada__isnull=True,
+                                                            devolucao__isnull=True)
+        serializer = serializers.MovimentacaoSerializer(movimentacoes, many=True)
+        return Response(serializer.data)
+
+
+class CancelarReservaServiceView(APIView):
+
+    def post(self, request, format=None):
+        movimentacao_id = request.data.get('movimentacao_id')
+        movimentacao = models.Movimentacao.objects.filter(id=movimentacao_id).first()
+        if movimentacao:
+            movimentacao.delete()
+            return Response(200)
         return Response(204)
 
 
 #class ConfirmarTransferenciaObjetoServiceView(APIView):
     # permission_classes = (permissions.IsAuthenticated,)
  #   def post(self, request, format=None):
-
-
+ 
+ 
 class FiltroMovimentacaoUsuarioServiceView(APIView):
     # permission_classes = (permissions.IsAuthenticated,)
 
