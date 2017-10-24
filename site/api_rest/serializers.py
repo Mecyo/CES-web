@@ -8,10 +8,28 @@ class ObjetoSerializer(serializers.ModelSerializer):
         model = models.Objeto
         fields = ('id', 'nome', 'tipoObjeto_id', 'status')
         depth = 1
+        
+        
+class PerfilUsuarioSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.PerfilUsuario
+        fields = ('id', 'nome')
+        depth = 1
+
+		
+class UsuarioSerializer(serializers.ModelSerializer):
+
+    perfilUsuario_id = PerfilUsuarioSerializer()
+    class Meta:
+        model = models.Usuario
+        fields = ('id', 'name', 'email', 'perfilUsuario_id')
+        depth = 1
 
 
 class MovimentacaoSerializer(serializers.ModelSerializer):
     usuario_id = UsuarioSerializer()
+    objeto_id = ObjetoSerializer()
     reserva = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
@@ -27,19 +45,3 @@ class TransferenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Transferencia
         fields = '__all__'
-
-
-class PerfilUsuarioSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.PerfilUsuario
-        fields = ('id', 'nome')
-        depth = 1
-
-class UsuarioSerializer(serializers.ModelSerializer):
-
-    perfilUsuario_id = PerfilUsuarioSerializer()
-    class Meta:
-        model = models.Usuario
-        fields = ('id', 'name', 'email', 'perfilUsuario_id')
-        depth = 1
